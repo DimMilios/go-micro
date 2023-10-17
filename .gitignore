@@ -1,8 +1,10 @@
 # broker service binary
 broker-service/brokerApp
 
-
 # frontend binary
 front-end/frontApp
+
+# auth binary
+authentication-service/authApp
 
 *.code-workspace
