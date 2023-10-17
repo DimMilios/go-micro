@@ -2,3 +2,9 @@
 curl -v -H "content-type: application/json" \
     -d '{"email": "admin@example.com", "password": "verysecret"}' \
     127.0.0.1:9001/authenticate
+
+
+# Authenticate with dummy user data through the broker service
+curl -v -H "content-type: application/json" \
+    -d '{"action":"auth", "auth": {"email": "admin@example.com", "password": "verysecret"}}' \
+    127.0.0.1:9000/handle
