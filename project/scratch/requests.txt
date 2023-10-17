@@ -1,0 +1,4 @@
+# Authenticate with dummy user data
+curl -v -H "content-type: application/json" \
+    -d '{"email": "admin@example.com", "password": "verysecret"}' \
+    127.0.0.1:9001/authenticate
