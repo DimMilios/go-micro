@@ -4,3 +4,5 @@ broker-service/brokerApp
 
 # frontend binary
 front-end/frontApp
+
+*.code-workspace
