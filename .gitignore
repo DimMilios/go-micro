@@ -7,4 +7,10 @@ front-end/frontApp
 # auth binary
 authentication-service/authApp
 
+
+# logger binary
+logger-service/loggerApp
+
 *.code-workspace
+
+project/db-data
