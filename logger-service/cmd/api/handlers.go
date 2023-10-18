@@ -31,3 +31,19 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 	}
 	app.writeJSON(w, http.StatusAccepted, resp)
 }
+
+func (app *Config) FindAllLogs(w http.ResponseWriter, r *http.Request) {
+	logEntries, err := app.Models.LogEntry.All()
+
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	resp := jsonResponse{
+		Error:   false,
+		Message: "all log entries",
+		Data:    logEntries,
+	}
+	app.writeJSON(w, http.StatusOK, resp)
+}
