@@ -7,9 +7,11 @@ front-end/frontApp
 # auth binary
 authentication-service/authApp
 
-
 # logger binary
 logger-service/loggerApp
+
+# mailer binary
+mail-service/mailerApp
 
 *.code-workspace
 
