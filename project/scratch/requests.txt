@@ -8,3 +8,8 @@ curl -v -H "content-type: application/json" \
 curl -v -H "content-type: application/json" \
     -d '{"action":"auth", "auth": {"email": "admin@example.com", "password": "verysecret"}}' \
     127.0.0.1:9000/handle
+
+# Send a mail through the broker service
+curl -v -H "content-type: application/json" \
+    -d '{"action": "mail", "mail": {"from": "dim@example.com", "to": "jon@example.com", "subject": "test", "message": "hello"}}' \
+    127.0.0.1:9000/handle
