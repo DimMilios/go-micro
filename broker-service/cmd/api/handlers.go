@@ -1,6 +1,7 @@
 package main
 
 import (
+	"broker/event"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -53,7 +54,7 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	case "auth":
 		app.authenticate(w, requestPayload.Auth)
 	case "log":
-		app.writeLog(w, requestPayload.Log)
+		app.logEventRabbit(w, requestPayload.Log)
 	case "mail":
 		app.sendMail(w, requestPayload.Mail)
 	default:
@@ -112,42 +113,38 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	app.writeJSON(w, http.StatusAccepted, payload)
 }
 
-func (app *Config) writeLog(w http.ResponseWriter, l LogPayload) {
-	// create json we'll send to the logger microservice
-	jsonData, _ := json.MarshalIndent(l, "", "\t")
-
-	// call logger service
-	request, err := http.NewRequest("POST", "http://logger-service/log", bytes.NewBuffer(jsonData))
+func (app *Config) logEventRabbit(w http.ResponseWriter, l LogPayload) {
+	err := app.pushToQueue(l.Name, l.Data)
 	if err != nil {
-		app.errorJSON(w, err)
-		return
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		app.errorJSON(w, err)
-		return
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusAccepted {
-		app.errorJSON(w, errors.New("failed to write event to logger service"))
-		return
-	}
-
-	var jsonFromService jsonResponse
-	if err = json.NewDecoder(response.Body).Decode(&jsonFromService); err != nil {
 		app.errorJSON(w, err)
 		return
 	}
 
 	var payload = jsonResponse{
 		Error:   false,
-		Message: "logged",
+		Message: "logged via RabbitMQ",
 	}
 	app.writeJSON(w, http.StatusAccepted, payload)
+}
+
+func (app *Config) pushToQueue(name, msg string) error {
+	producer, err := event.NewProducer(app.RabbitConn)
+	if err != nil {
+		return err
+	}
+
+	payload := LogPayload{
+		Name: name,
+		Data: msg,
+	}
+
+	j, _ := json.MarshalIndent(payload, "", "\t")
+	err = producer.Push(string(j), "log.INFO")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {

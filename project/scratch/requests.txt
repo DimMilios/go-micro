@@ -13,3 +13,9 @@ curl -v -H "content-type: application/json" \
 curl -v -H "content-type: application/json" \
     -d '{"action": "mail", "mail": {"from": "dim@example.com", "to": "jon@example.com", "subject": "test", "message": "hello"}}' \
     127.0.0.1:9000/handle
+
+
+# Send a log through the broker service
+curl -v -H "content-type: application/json" \
+    -d '{"action": "log", "log": {"name": "log", "data": "logged data" }}' \
+    127.0.0.1:9000/handle
