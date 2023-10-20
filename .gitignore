@@ -13,6 +13,9 @@ logger-service/loggerApp
 # mailer binary
 mail-service/mailerApp
 
+# listener binary
+listener-service/listenerApp
+
 *.code-workspace
 
 project/db-data

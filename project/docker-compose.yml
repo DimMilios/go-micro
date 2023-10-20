@@ -55,6 +55,17 @@ services:
       MAIL_ENCRYPTION: none
       MAIL_FROM_NAME: "Dim Mil"
       MAIL_FROM_ADDRESS: dim.mil@example.com
+
+  listener-service:
+    build:
+      context: ./../listener-service
+      dockerfile: ./../listener-service/listener-service.dockerfile
+    restart: always
+    ports:
+      - "9004:80"
+    deploy:
+      mode: replicated
+      replicas: 1
   
   postgres:
     image: postgres:latest
