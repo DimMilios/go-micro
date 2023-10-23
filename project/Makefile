@@ -5,6 +5,8 @@ LOGGER_BINARY=loggerApp
 MAILER_BINARY=mailerApp
 LISTENER_BINARY=listenerApp
 
+PG_CONTAINER=postgres
+
 ## up: starts all containers in the background without forcing build
 up:
 	@echo "Starting Docker images..."
@@ -71,3 +73,27 @@ stop:
 	@echo "Stopping front end..."
 	@-pkill -SIGTERM -f "./${FRONT_END_BINARY}"
 	@echo "Stopped front end!"
+
+## pg_start: starts a standalone postgres container
+pg_start:
+	@echo "Starting standalone postgres container..."
+	docker run --rm -d -p 5432:5432 \
+		--env POSTGRES_USER=postgres --env POSTGRES_PASSWORD=password --env POSTGRES_DB=users \
+		--name ${PG_CONTAINER} --mount type=bind,source=./db-data/postgres,destination=/var/lib/postgresql/data \
+		--network=myapp_default postgres:latest
+	@echo "Postgres container started!"
+
+## swarm_start: builds and deploys swarm stack and runs a postgres container via a custom script because errors
+swarm_start:
+	@echo "Deploying stack to docker swarm ..."
+	docker stack deploy -c swarm.yml myapp
+	@echo "Stack deployed!"
+
+## swarm_deploy: deploys stack to swarm and runs a standalone postgres container
+swarm_deploy: swarm_start pg_start
+
+## swarm_rm: stops and removes swarm stack and postgres container
+## note: the postgres container must be stopped first so the shared network can be removed as well
+swarm_rm:
+	docker container stop ${PG_CONTAINER}
+	docker stack rm myapp
