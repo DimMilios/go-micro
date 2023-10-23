@@ -3,6 +3,7 @@ broker-service/brokerApp
 
 # frontend binary
 front-end/frontApp
+front-end/frontEndApp
 
 # auth binary
 authentication-service/authApp
