@@ -1,6 +1,30 @@
 version: '3'
 
 services:
+  caddy:
+    image: dimmil/micro-caddy:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - default
+
+  front-end:
+    image: dimmil/front-end:1.0.1
+    environment:
+      BROKER_URL: "http://backend"
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - default
+
   broker-service:
     image: dimmil/broker-service:1.0.1
     deploy:
@@ -103,3 +127,8 @@ networks:
   default:
     driver: overlay
     attachable: true # allow external postgres container to connect
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:
