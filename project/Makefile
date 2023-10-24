@@ -82,6 +82,7 @@ stop:
 	@echo "Stopped front end!"
 
 ## pg_start: starts a standalone postgres container
+## NO_LONGER_NEEDED
 pg_start:
 	@echo "Starting standalone postgres container..."
 	docker run --rm -d -p 5432:5432 \
@@ -96,8 +97,8 @@ swarm_start:
 	docker stack deploy -c swarm.yml myapp
 	@echo "Stack deployed!"
 
-## swarm_deploy: deploys stack to swarm and runs a standalone postgres container
-swarm_deploy: swarm_start pg_start
+## swarm_deploy: deploys stack to swarm
+swarm_deploy: swarm_start 
 
 ## swarm_rm: stops and removes swarm stack and postgres container
 ## note: the postgres container must be stopped first so the shared network can be removed as well

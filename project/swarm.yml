@@ -107,21 +107,19 @@ services:
     networks:
       - default
 
-  # Warning: Fails to start the service cause of some issues with bind mounts,
-  # so we run an external container for postgres. Check Makefile
-  # postgres:
-  #   image: postgres:latest
-  #   ports:
-  #     - "5432:5432"
-  #   deploy:
-  #     mode: replicated 
-  #     replicas: 1
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: users
-  #   volumes:
-  #     - ./db-data/postgres/:/var/lib/postgresql/data/
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    deploy:
+      mode: replicated 
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
 
 networks:
   default:
