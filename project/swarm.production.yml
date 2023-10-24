@@ -1,0 +1,134 @@
+version: '3'
+
+services:
+  caddy:
+    image: dimmil/micro-caddy-prod:1.0.1
+    deploy:
+      mode: replicated
+      replicas: 1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - default
+
+  front-end:
+    image: dimmil/front-end:1.0.1
+    environment:
+      BROKER_URL: "http://CHANGE_THIS"
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - default
+
+  broker-service:
+    image: dimmil/broker-service:1.0.1
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - default
+  
+  listener-service:
+    image: dimmil/listener-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - default
+  
+  authentication-service:
+    image: dimmil/authentication-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+    networks:
+      - default
+  
+  logger-service:
+    image: dimmil/logger-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - default
+
+  mailer-service:
+    image: dimmil/mail-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MAIL_DOMAIN: localhost
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025 
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_ENCRYPTION: none
+      MAIL_FROM_NAME: "John Doe"
+      MAIL_FROM_ADDRESS: john.doe@example.com
+    networks:
+      - default
+
+  rabbitmq:
+    image: rabbitmq:3.9-alpine
+    deploy:
+      mode: global
+    networks:
+      - default
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+    deploy:
+      mode: global
+    networks:
+      - default
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    deploy:
+      mode: global
+    environment:
+      MONGO_INITDB_ROOT_DATABASE: logs 
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./db-data/mongo/:/data/db
+    networks:
+      - default
+
+  # Warning: Fails to start the service cause of some issues with bind mounts,
+  # so we run an external container for postgres. Check Makefile
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    deploy:
+      mode: replicated 
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+
+networks:
+  default:
+    driver: overlay
+    attachable: true # allow external postgres container to connect
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:
